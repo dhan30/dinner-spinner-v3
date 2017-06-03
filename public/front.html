@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <style>
+       #map {
+        height: 400px;
+        width: 100%;
+       }
+    </style>
+  <!-- <link rel="stylesheet" type="text/css" href="css/reset.css"> -->
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+  <title>Dinner Spinner</title>
+  <script src="https://code.jquery.com/jquery-3.2.1.js"></script>  
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+  <link rel="stylesheet" type="text/css" href="css/front.css">
+  <link rel="stylesheet" type="text/css" href="css/map.css">
+  <!-- Bootstrap -->
+  <script src="https://d3js.org/d3.v3.min.js" charset="utf-8"></script>
+</head>
+<body>
+  <header>
+    <div class="header-container">
+      <div id="logo">
+          <img src="images/spinner-logo.png" alt="logo-image" class="logo-image">
+        <a href="front.html"><span class="highlight">D</span>inner <span class="highlight">S</span>pinner!</a>
+      </div>
+    </div>
+  </header>
+
+  <div class="main_container">
+    <div class="jumbotron">
+        <!-- <div class="panel"> -->
+          <div class="title" id="title">
+            <h1>Have you ever been lost on where to go out to eat?</h1>
+            <a class="btn btn-default" href="login.html">Login</a>
+            <a class="btn btn-default" href="register-test.html">Register</a>
+          </div>
+        <!-- </div> -->
+        <div class="panel-2">
+          <div class="left-panel-wrapper">
+            <div class="left-panel-1">
+                <div id="restourantInfo"><h2></h2></div>
+                  <div id="chart"></div>
+            </div>
+        
+            <div class="panel-input">
+              <p>Enter the prefered distance</p><br>
+              <div class="input-group">
+                <input type="text" placeholder="milage!">
+                <button class="btn btn-default">Enter</button>
+             
+              </div>
+            </div>
+          </div>
+
+            <div class="panel-article">
+              <div class="article">
+                <div class="article-head"><h1>Dinner-Spinner:</h1></div>
+                <div class="article-body">
+                  <p>Dinner Spinner is a location based app that will give users a randomized
+                    list of restaurants within your desired radius and
+                    restaurant prefences(rating, price, type of food, etc.).
+                    User prefences and info can be stored in a database via sequalize.
+                    The app utilized the Google Places API for a map display and restaurant search.</p>
+                  </div>
+                </div>
+            </div>
+          </div>
+        </div>
+
+    </div>
+    <input id="pac-input" class="controls" type="text" placeholder="Search Box">
+    <div id="map"></div>
+
+        <!-- /*  footer-*/ -->
+        <footer class="footer-distributed">
+          <div class="footer-left">
+            <h3>DynoCretive<span>Dev</span></h3>
+            <p class="footer-links">
+              <a href="#">Home</a>
+            </p>
+            <p class="footer-company-name">DynoCretive &copy; 2017</p>
+            <div class="footer-icons">
+              <a href="#"><i class="fa fa-github"></i></a>
+            </div>
+          </div>
+          <div class="footer-right">
+            <p>Contact US</p>
+            <form action="#" method="post">
+              <input type="text" name="email" placeholder="Email"/>
+              <textarea name="message" placeholder="Message"></textarea>
+              <button>Send</button>
+            </form>
+          </div>
+        </footer>
+        <script type="text/javascript">
+        // create map and create location
+        
+      function initAutocomplete() {
+        var map = new google.maps.Map(document.getElementById('map'), {
+          center: {lat: -33.8688, lng: 151.2195},
+          zoom: 13,
+          mapTypeId: 'roadmap'
+        });
+
+        // Create the search box and link it to the UI element.
+        var input = document.getElementById('pac-input');
+        var searchBox = new google.maps.places.SearchBox(input);
+        map.controls[google.maps.ControlPosition.TOP_LEFT].push(input);
+
+        // Bias the SearchBox results towards current map's viewport.
+        map.addListener('bounds_changed', function() {
+          searchBox.setBounds(map.getBounds());
+        });
+
+        var markers = [];
+        // Listen for the event fired when the user selects a prediction and retrieve
+        // more details for that place.
+        searchBox.addListener('places_changed', function() {
+          var places = searchBox.getPlaces();
+
+          if (places.length == 0) {
+            return;
+          }
+
+          // Clear out the old markers.
+          markers.forEach(function(marker) {
+            marker.setMap(null);
+          });
+          markers = [];
+
+          // For each place, get the icon, name and location.
+          var bounds = new google.maps.LatLngBounds();
+          places.forEach(function(place) {
+            if (!place.geometry) {
+              console.log("Returned place contains no geometry");
+              return;
+            }
+            var icon = {
+              url: place.icon,
+              size: new google.maps.Size(71, 71),
+              origin: new google.maps.Point(0, 0),
+              anchor: new google.maps.Point(17, 34),
+              scaledSize: new google.maps.Size(25, 25)
+            };
+
+            // Create a marker for each place.
+            markers.push(new google.maps.Marker({
+              map: map,
+              icon: icon,
+              title: place.name,
+              position: place.geometry.location
+            }));
+
+            if (place.geometry.viewport) {
+              // Only geocodes have viewport.
+              bounds.union(place.geometry.viewport);
+            } else {
+              bounds.extend(place.geometry.location);
+            }
+          });
+          map.fitBounds(bounds);
+        });
+      }
+
+
+
+</script>
+<!-- script src for search box -->
+<!-- <script src="front-1.js">
+  
+</script> -->
+
+<!-- script src for goolge map api -->
+    <script async defer
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDFBMnHW5q-kMtOaYxxOYAXt53T7_9U-qM&libraries=places&callback=initAutocomplete">
+    </script>
+    <!--  <script async defer
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyAycyGEAdKycGd1ACsHjbjQQQ12P_ENVko&libraries=place&callback=initAutocomplete">
+    </script> -->
+<!-- script src for spinner -->
+    <script type="text/javascript" charset="utf-8" src="js/spinner.js"></script>
+     <script type="text/javascript" charset="utf-8" src="js/front.js"></script>
+       
+      
+        
+
+      </body>
+      </html>
